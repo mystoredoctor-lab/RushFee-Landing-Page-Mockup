@@ -13,7 +13,15 @@ const {
 
 // Home / Landing page
 app.get("/", (req, res) => {
-  res.send("RushFee Landing Page (frontend will load here)");
+  const shop = req.query.shop;
+
+  // If Shopify opened the app and shop is present, start OAuth
+  if (shop) {
+    return res.redirect(`/auth?shop=${shop}`);
+  }
+
+  // Fallback (direct browser access)
+  res.send("RushFee backend running");
 });
 
 // 1️⃣ Start OAuth
