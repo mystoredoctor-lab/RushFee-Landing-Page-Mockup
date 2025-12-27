@@ -3,10 +3,11 @@ import crypto from "crypto";
 import path from "path";
 import fetch from "node-fetch";
 import { fileURLToPath } from "url";
+import { supabase } from "./supabase.js";
 
 const app = express();
 
-// Needed because you use ES modules
+// ES module path fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,16 +23,16 @@ const {
 // Serve Vite build output
 app.use(express.static(path.join(__dirname, "../dist")));
 
-// Root route – serve React app
+// Root route
 app.get("/", (req, res) => {
   const shop = req.query.shop;
 
-  // If Shopify opens the app → start OAuth
+  // If Shopify iframe opens the app
   if (shop) {
     return res.redirect(`/auth?shop=${shop}`);
   }
 
-  // Normal browser visit → React landing page
+  // Normal browser visit
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
@@ -58,6 +59,7 @@ app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
   if (!shop || !code) return res.status(400).send("Missing parameters");
 
+  // Exchange code for access token
   const tokenResponse = await fetch(
     `https://${shop}/admin/oauth/access_token`,
     {
@@ -73,11 +75,21 @@ app.get("/auth/callback", async (req, res) => {
 
   const data = await tokenResponse.json();
 
-  console.log("Installed shop:", shop);
-  console.log("Access token received");
+  if (!data.access_token) {
+    return res.status(500).send("Failed to get access token");
+  }
 
-  // 🔜 Save shop + token in Supabase later
+  // ✅ SAVE SHOP TO SUPABASE
+  await supabase
+    .from("shops")
+    .upsert({
+      shop_domain: shop,
+      access_token: data.access_token
+    });
 
+  console.log("Shop installed & saved:", shop);
+
+  // Redirect back into app
   res.redirect(`/?shop=${shop}`);
 });
 
