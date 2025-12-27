@@ -1,113 +1,119 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from "react-router-dom";
-import { ConfigurationPage } from "./pages/ConfigurationPage";
-import { DashboardPage } from "./pages/DashboardPage";
-import {
-  FaChartLine,
-  FaBolt,
-  FaDollarSign,
-  FaShieldAlt,
-  FaArrowRight,
-  FaCheck,
-  FaShopify,
-  FaAws,
-  FaStripe,
-  FaStar
-} from "react-icons/fa";
+import { useEffect, useState } from "react";
 
-function LandingPage() {
-  // ✅ READ SHOP FROM URL
-  const params = new URLSearchParams(window.location.search);
-  const shop = params.get("shop");
+type Page = "landing" | "config" | "dashboard";
 
-  // ✅ THIS IS THE ONLY CORRECT INSTALL HANDLER
+export default function App() {
+  const [page, setPage] = useState<Page>("landing");
+  const [shop, setShop] = useState<string | null>(null);
+
+  /* -------------------------------------------
+     READ SHOP PARAM FROM URL
+  -------------------------------------------- */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shopParam = params.get("shop");
+
+    if (shopParam) {
+      setShop(shopParam);
+      setPage("config");
+    }
+  }, []);
+
+  /* -------------------------------------------
+     START SHOPIFY INSTALL (BUTTON CLICK)
+  -------------------------------------------- */
   const startInstall = () => {
-    if (!shop) {
-      alert("Missing shop parameter. Please install from Shopify.");
+    const params = new URLSearchParams(window.location.search);
+    const shopParam = params.get("shop");
+
+    if (!shopParam) {
+      alert(
+        "Missing shop parameter.\n\nOpen the app from Shopify Admin."
+      );
       return;
     }
 
-    // FULL REDIRECT → SHOPIFY OAUTH
-    window.location.href = `/auth?shop=${shop}`;
+    window.location.href = `/auth?shop=${shopParam}`;
   };
 
-  return (
-    <div className="overflow-x-hidden" style={{ minHeight: "100%" }}>
-      {/* --- HERO SECTION --- */}
-      <section className="pt-20 pb-12 px-4 text-center max-w-5xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6">
-          Turn urgency into{" "}
-          <span className="bg-clip-text text-transparent bg-btn-gradient">
-            instant revenue
-          </span>
-        </h1>
-
-        <p className="text-gray-400 mb-8">
-          Let customers pay for faster order handling and priority packaging.
+  /* -------------------------------------------
+     LANDING PAGE
+  -------------------------------------------- */
+  if (page === "landing") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
+        <h1 className="text-4xl font-bold mb-4">RushFee</h1>
+        <p className="text-gray-600 mb-8 text-center max-w-md">
+          Turn urgency into revenue by charging customers for priority
+          processing.
         </p>
 
-        {/* ✅ FIXED CTA BUTTON */}
-        <button
-          onClick={startInstall}
-          className="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-btn-gradient rounded-full hover:scale-105"
-        >
-          Get Started Now
-          <FaArrowRight className="ml-2" />
-        </button>
-      </section>
+        <div className="flex gap-4">
+          <button
+            onClick={startInstall}
+            className="rounded-xl bg-black px-6 py-3 text-white font-semibold hover:opacity-90"
+          >
+            Get Started Now
+          </button>
 
-      {/* --- PRICING CTA --- */}
-      <section className="py-24 text-center">
-        <button
-          onClick={startInstall}
-          className="px-8 py-4 rounded-full bg-btn-gradient text-white font-bold hover:scale-105"
-        >
-          Start for Free
-        </button>
-      </section>
+          <button
+            onClick={startInstall}
+            className="rounded-xl border px-6 py-3 font-semibold hover:bg-gray-50"
+          >
+            Start for Free
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-      <footer className="py-8 text-center text-gray-500 text-sm">
-        © 2024 RushFee. All rights reserved.
-      </footer>
+  /* -------------------------------------------
+     CONFIG PAGE
+  -------------------------------------------- */
+  if (page === "config") {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <header className="mb-6">
+          <h2 className="text-2xl font-bold">RushFee Setup</h2>
+          <p className="text-sm text-gray-600">
+            Store: <strong>{shop}</strong>
+          </p>
+        </header>
+
+        <div className="bg-white rounded-xl p-6 shadow">
+          <p className="mb-4">
+            Configuration page (real data comes next).
+          </p>
+
+          <button
+            onClick={() => setPage("dashboard")}
+            className="rounded-lg bg-black px-5 py-2 text-white"
+          >
+            Save & Continue
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* -------------------------------------------
+     DASHBOARD
+  -------------------------------------------- */
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <header className="mb-6">
+        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <p className="text-sm text-gray-600">
+          Store: <strong>{shop}</strong>
+        </p>
+      </header>
+
+      <div className="bg-white rounded-xl p-6 shadow">
+        <p>Dashboard connected. No mock data anymore.</p>
+      </div>
     </div>
   );
-}
-
-export function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/config" element={<ConfigurationPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-      </Routes>
-    </Router>
-  );
-    }
-        {/* 3. BOOST AOV SECTION */}
-        <section className="py-24 px-4 relative">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              {/* Visual Representation */}
-              <div className="relative order-2 md:order-1">
-                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 blur-2xl rounded-full opacity-50"></div>
-                <div className="glass-card p-6 rounded-2xl relative border border-white/10 neon-shadow">
-                  <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                    <span className="text-sm text-gray-400">Your Checkout</span>
-                    <div className="h-2 w-12 bg-green-500/50 rounded-full"></div>
-                  </div>
-                  {/* Mock Checkout Item */}
-                  <div className="space-y-4">
-                    <div className="flex gap-4 items-center opacity-50">
-                      <div className="w-16 h-16 bg-gray-700 rounded-lg"></div>
-                      <div className="flex-1">
-                        <div className="h-3 w-3/4 bg-gray-700 rounded mb-2"></div>
-                        <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
-                      </div>
+}                      </div>
                       <div className="h-3 w-12 bg-gray-700 rounded"></div>
                     </div>
 
