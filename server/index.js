@@ -1,7 +1,14 @@
 import express from "express";
 import crypto from "crypto";
+import path from "path";
+import fetch from "node-fetch";
+import { fileURLToPath } from "url";
 
 const app = express();
+
+// Needed because you use ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const {
   SHOPIFY_API_KEY,
@@ -10,68 +17,48 @@ const {
   APP_URL
 } = process.env;
 
-/**
- * Landing page
- * No auth here
- */
+/* ---------------- FRONTEND ---------------- */
+
+// Serve Vite build output
+app.use(express.static(path.join(__dirname, "../dist")));
+
+// Root route – serve React app
 app.get("/", (req, res) => {
-  const shop = req.query.shop || "";
-
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>RushFee</title>
-      </head>
-      <body style="font-family: sans-serif">
-        <h1>RushFee</h1>
-        <p>Generate extra revenue with priority processing.</p>
-
-        <form action="/start" method="GET">
-          <input type="hidden" name="shop" value="${shop}" />
-          <button type="submit">Get Started</button>
-        </form>
-      </body>
-    </html>
-  `);
-});
-
-/**
- * Start OAuth after button click
- */
-app.get("/start", (req, res) => {
   const shop = req.query.shop;
-  if (!shop) return res.status(400).send("Missing shop");
 
-  res.redirect(`/auth?shop=${shop}`);
+  // If Shopify opens the app → start OAuth
+  if (shop) {
+    return res.redirect(`/auth?shop=${shop}`);
+  }
+
+  // Normal browser visit → React landing page
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-/**
- * Shopify OAuth
- */
+/* ---------------- SHOPIFY OAUTH ---------------- */
+
 app.get("/auth", (req, res) => {
-  const shop = req.query.shop;
-  if (!shop) return res.status(400).send("Missing shop");
+  const { shop } = req.query;
+  if (!shop) return res.status(400).send("Missing shop parameter");
 
+  const state = crypto.randomBytes(16).toString("hex");
   const redirectUri = `${APP_URL}/auth/callback`;
 
   const installUrl =
     `https://${shop}/admin/oauth/authorize` +
     `?client_id=${SHOPIFY_API_KEY}` +
     `&scope=${SCOPES}` +
-    `&redirect_uri=${redirectUri}`;
+    `&redirect_uri=${redirectUri}` +
+    `&state=${state}`;
 
   res.redirect(installUrl);
 });
 
-/**
- * OAuth callback
- */
 app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
-  if (!shop || !code) return res.status(400).send("Missing params");
+  if (!shop || !code) return res.status(400).send("Missing parameters");
 
-  const response = await fetch(
+  const tokenResponse = await fetch(
     `https://${shop}/admin/oauth/access_token`,
     {
       method: "POST",
@@ -84,21 +71,24 @@ app.get("/auth/callback", async (req, res) => {
     }
   );
 
-  await response.json();
+  const data = await tokenResponse.json();
 
   console.log("Installed shop:", shop);
+  console.log("Access token received");
 
-  res.redirect("/config");
+  // 🔜 Save shop + token in Supabase later
+
+  res.redirect(`/?shop=${shop}`);
 });
 
-/**
- * Config page
- */
-app.get("/config", (req, res) => {
-  res.send("<h1>RushFee Config Page</h1>");
+/* ---------------- FALLBACK ---------------- */
+
+// React Router support
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("RushFee running on port " + PORT);
+  console.log(`RushFee running on port ${PORT}`);
 });
