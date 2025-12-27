@@ -26,6 +26,10 @@ app.use(express.static(path.join(__dirname, "../dist")));
 // Root route
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
+
+  const shop = new URLSearchParams(window.location.search).get("shop");
+
+window.location.href = `/auth?shop=${shop}`;
 });
 
 /* ---------------- SHOPIFY OAUTH ---------------- */
