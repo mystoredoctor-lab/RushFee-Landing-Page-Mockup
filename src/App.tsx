@@ -1,113 +1,93 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { ConfigurationPage } from './pages/ConfigurationPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { FaChartLine, FaBolt, FaDollarSign, FaShieldAlt, FaArrowRight, FaCheck, FaShopify, FaAws, FaStripe, FaStar } from 'react-icons/fa';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from "react-router-dom";
+import { ConfigurationPage } from "./pages/ConfigurationPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import {
+  FaChartLine,
+  FaBolt,
+  FaDollarSign,
+  FaShieldAlt,
+  FaArrowRight,
+  FaCheck,
+  FaShopify,
+  FaAws,
+  FaStripe,
+  FaStar
+} from "react-icons/fa";
+
 function LandingPage() {
-  return <div className="overflow-x-hidden" style={{
-    height: 'auto',
-    minHeight: '100%'
-  }}>
-      {/* Background Grid & Glow */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-grid-pattern opacity-[0.07] grid-bg"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-hero-glow opacity-60"></div>
-      </div>
+  // ✅ READ SHOP FROM URL
+  const params = new URLSearchParams(window.location.search);
+  const shop = params.get("shop");
 
-      {/* Main Content Wrapper */}
-      <div className="relative z-10 flex flex-col w-full">
-        {/* 1. HERO SECTION */}
-        <section className="pt-20 pb-12 px-4 text-center max-w-5xl mx-auto w-full">
-          {/* Logo with Gradient */}
-          <div className="mb-12 flex justify-center">
-            <div className="glass-card px-6 py-3 rounded-xl flex items-center gap-2">
-              <span className="font-bold text-xl tracking-tight">
-                Rush<span className="gradient-text">Fee</span>
-              </span>
-            </div>
-          </div>
+  // ✅ THIS IS THE ONLY CORRECT INSTALL HANDLER
+  const startInstall = () => {
+    if (!shop) {
+      alert("Missing shop parameter. Please install from Shopify.");
+      return;
+    }
 
-          {/* Headline */}
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
-            Turn urgency into <br />
-            <span className="bg-clip-text text-transparent bg-btn-gradient">
-              instant revenue
-            </span>
-          </h1>
+    // FULL REDIRECT → SHOPIFY OAUTH
+    window.location.href = `/auth?shop=${shop}`;
+  };
 
-          {/* Subheadline */}
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-            Let customers pay for{' '}
-            <span className="text-white font-medium">
-              faster order handling
-            </span>{' '}
-            and{' '}
-            <span className="text-white font-medium">priority packaging</span>{' '}
-            directly at checkout.
-          </p>
+  return (
+    <div className="overflow-x-hidden" style={{ minHeight: "100%" }}>
+      {/* --- HERO SECTION --- */}
+      <section className="pt-20 pb-12 px-4 text-center max-w-5xl mx-auto">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6">
+          Turn urgency into{" "}
+          <span className="bg-clip-text text-transparent bg-btn-gradient">
+            instant revenue
+          </span>
+        </h1>
 
-          {/* Feature Pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            <span className="px-4 py-1.5 rounded-full bg-[#00f2ea]/10 text-[#00f2ea] text-sm font-medium border border-[#00f2ea]/20">
-              <FaChartLine className="inline mr-2" />
-              Boost AOV by 15-25%
-            </span>
-            <span className="px-4 py-1.5 rounded-full bg-blue-500/10 text-blue-400 text-sm font-medium border border-blue-500/20">
-              <FaBolt className="inline mr-2" />
-              Setup in 2 minutes
-            </span>
-            <span className="px-4 py-1.5 rounded-full bg-purple-500/10 text-purple-400 text-sm font-medium border border-purple-500/20">
-              <FaDollarSign className="inline mr-2" />
-              $0.20 per order
-            </span>
-          </div>
+        <p className="text-gray-400 mb-8">
+          Let customers pay for faster order handling and priority packaging.
+        </p>
 
-          {/* No Subscription Badge */}
-          <div className="mb-8">
-            <span className="inline-block px-4 py-1 rounded-full bg-gray-800/50 text-gray-400 text-xs border border-gray-700">
-              <FaShieldAlt className="inline mr-2 text-green-400" />
-              No subscription required. You're only charged per priority order.
-            </span>
-          </div>
+        {/* ✅ FIXED CTA BUTTON */}
+        <button
+          onClick={startInstall}
+          className="group inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-btn-gradient rounded-full hover:scale-105"
+        >
+          Get Started Now
+          <FaArrowRight className="ml-2" />
+        </button>
+      </section>
 
-          {/* CTA Button */}
-          <Link to="/config">
-            <button className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-btn-gradient rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(255,0,80,0.4)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-pink-500 overflow-hidden">
-              <div className="animate-shimmer absolute inset-0 z-10"></div>
-              <span className="relative z-20 flex items-center">
-                Get Started Now
-                <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </button>
-          </Link>
-        </section>
+      {/* --- PRICING CTA --- */}
+      <section className="py-24 text-center">
+        <button
+          onClick={startInstall}
+          className="px-8 py-4 rounded-full bg-btn-gradient text-white font-bold hover:scale-105"
+        >
+          Start for Free
+        </button>
+      </section>
 
-        {/* 2. STATS ROW */}
-        <section className="py-12 border-y border-white/5 bg-black/20 backdrop-blur-sm">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
-              <div className="p-4">
-                <div className="text-4xl font-bold text-white mb-2">$1.6M+</div>
-                <div className="text-gray-400 text-sm uppercase tracking-wider">
-                  Revenue Generated
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="text-4xl font-bold text-white mb-2">12K+</div>
-                <div className="text-gray-400 text-sm uppercase tracking-wider">
-                  Priority Orders
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="text-4xl font-bold text-white mb-2">98%</div>
-                <div className="text-gray-400 text-sm uppercase tracking-wider">
-                  Satisfaction Rate
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <footer className="py-8 text-center text-gray-500 text-sm">
+        © 2024 RushFee. All rights reserved.
+      </footer>
+    </div>
+  );
+}
 
+export function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/config" element={<ConfigurationPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
+    </Router>
+  );
+    }
         {/* 3. BOOST AOV SECTION */}
         <section className="py-24 px-4 relative">
           <div className="max-w-6xl mx-auto">
