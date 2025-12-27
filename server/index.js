@@ -25,14 +25,6 @@ app.use(express.static(path.join(__dirname, "../dist")));
 
 // Root route
 app.get("/", (req, res) => {
-  const shop = req.query.shop;
-
-  // If Shopify iframe opens the app
-  if (shop) {
-    return res.redirect(`/auth?shop=${shop}`);
-  }
-
-  // Normal browser visit
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
