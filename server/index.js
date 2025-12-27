@@ -11,67 +11,67 @@ const {
 } = process.env;
 
 /**
- * 1️⃣ Landing page (NO AUTH HERE)
- * Shopify will open this after install
+ * Landing page
+ * No auth here
  */
 app.get("/", (req, res) => {
-  res.send(`
-    <h1>RushFee</h1>
-    <p>Turn urgency into revenue</p>
+  const shop = req.query.shop || "";
 
-    <form action="/start" method="GET">
-      <input
-        type="hidden"
-        name="shop"
-        value="${req.query.shop || ""}"
-      />
-      <button type="submit">Start for free</button>
-    </form>
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>RushFee</title>
+      </head>
+      <body style="font-family: sans-serif">
+        <h1>RushFee</h1>
+        <p>Generate extra revenue with priority processing.</p>
+
+        <form action="/start" method="GET">
+          <input type="hidden" name="shop" value="${shop}" />
+          <button type="submit">Get Started</button>
+        </form>
+      </body>
+    </html>
   `);
 });
 
 /**
- * 2️⃣ User clicks "Start for free"
- * This is where OAuth starts
+ * Start OAuth after button click
  */
 app.get("/start", (req, res) => {
   const shop = req.query.shop;
-
-  if (!shop) {
-    return res.status(400).send("Missing shop parameter");
-  }
+  if (!shop) return res.status(400).send("Missing shop");
 
   res.redirect(`/auth?shop=${shop}`);
 });
 
 /**
- * 3️⃣ Shopify OAuth
+ * Shopify OAuth
  */
 app.get("/auth", (req, res) => {
   const shop = req.query.shop;
-  if (!shop) return res.status(400).send("Missing shop parameter");
+  if (!shop) return res.status(400).send("Missing shop");
 
-  const state = crypto.randomBytes(16).toString("hex");
   const redirectUri = `${APP_URL}/auth/callback`;
 
   const installUrl =
     `https://${shop}/admin/oauth/authorize` +
     `?client_id=${SHOPIFY_API_KEY}` +
     `&scope=${SCOPES}` +
-    `&redirect_uri=${redirectUri}` +
-    `&state=${state}`;
+    `&redirect_uri=${redirectUri}`;
 
   res.redirect(installUrl);
 });
 
 /**
- * 4️⃣ OAuth callback
+ * OAuth callback
  */
 app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
-  if (!shop || !code) return res.status(400).send("Missing parameters");
+  if (!shop || !code) return res.status(400).send("Missing params");
 
-  const accessTokenResponse = await fetch(
+  const response = await fetch(
     `https://${shop}/admin/oauth/access_token`,
     {
       method: "POST",
@@ -84,20 +84,21 @@ app.get("/auth/callback", async (req, res) => {
     }
   );
 
-  const data = await accessTokenResponse.json();
+  await response.json();
 
   console.log("Installed shop:", shop);
-  console.log("Access token received");
-
-  // 🔜 Save shop + token later (Supabase / DB)
 
   res.redirect("/config");
 });
 
 /**
- * 5️⃣ Config page (after auth)
+ * Config page
  */
 app.get("/config", (req, res) => {
-  res.send(`
-    <h1>RushFee Configuration</h1>
-    <p>Set your priority order price here</
+  res.send("<h1>RushFee Config Page</h1>");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("RushFee running on port " + PORT);
+});
