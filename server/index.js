@@ -7,7 +7,7 @@ import { supabase } from "./supabase.js";
 
 const app = express();
 
-// ES module path fix
+// Fix __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -20,23 +20,22 @@ const {
 
 /* ---------------- FRONTEND ---------------- */
 
-// Serve Vite build output
+// Serve Vite build
 app.use(express.static(path.join(__dirname, "../dist")));
 
-// Root route
+// Serve frontend (NO LOGIC HERE)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
-
-  const shop = new URLSearchParams(window.location.search).get("shop");
-
-window.location.href = `/auth?shop=${shop}`;
 });
 
-/* ---------------- SHOPIFY OAUTH ---------------- */
+/* ---------------- SHOPIFY AUTH ---------------- */
 
 app.get("/auth", (req, res) => {
   const { shop } = req.query;
-  if (!shop) return res.status(400).send("Missing shop parameter");
+
+  if (!shop) {
+    return res.status(400).send("Missing shop parameter");
+  }
 
   const state = crypto.randomBytes(16).toString("hex");
   const redirectUri = `${APP_URL}/auth/callback`;
@@ -53,10 +52,12 @@ app.get("/auth", (req, res) => {
 
 app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
-  if (!shop || !code) return res.status(400).send("Missing parameters");
 
-  // Exchange code for access token
-  const tokenResponse = await fetch(
+  if (!shop || !code) {
+    return res.status(400).send("Missing shop or code");
+  }
+
+  const tokenRes = await fetch(
     `https://${shop}/admin/oauth/access_token`,
     {
       method: "POST",
@@ -69,29 +70,27 @@ app.get("/auth/callback", async (req, res) => {
     }
   );
 
-  const data = await tokenResponse.json();
+  const data = await tokenRes.json();
 
   if (!data.access_token) {
-    return res.status(500).send("Failed to get access token");
+    console.error(data);
+    return res.status(500).send("OAuth failed");
   }
 
-  // ✅ SAVE SHOP TO SUPABASE
-  await supabase
-    .from("shops")
-    .upsert({
-      shop_domain: shop,
-      access_token: data.access_token
-    });
+  // Save shop
+  await supabase.from("shops").upsert({
+    shop_domain: shop,
+    access_token: data.access_token
+  });
 
-  console.log("Shop installed & saved:", shop);
+  console.log("✅ Installed:", shop);
 
-  // Redirect back into app
-  res.redirect(`/?shop=${shop}`);
+  // Go to config page
+  res.redirect(`/config?shop=${shop}`);
 });
 
-/* ---------------- FALLBACK ---------------- */
+/* ---------------- SPA FALLBACK ---------------- */
 
-// React Router support
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
