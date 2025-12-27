@@ -6,7 +6,7 @@ export default function App() {
   const [page, setPage] = useState<Page>("landing");
   const [shop, setShop] = useState<string | null>(null);
 
-  // Read ?shop= from URL
+  // Read ?shop from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const shopParam = params.get("shop");
@@ -17,97 +17,75 @@ export default function App() {
     }
   }, []);
 
-  // Start OAuth
+  // Start Shopify OAuth
   const startInstall = () => {
-    const params = new URLSearchParams(window.location.search);
-    const shopParam = params.get("shop");
-
-    if (!shopParam) {
-      alert("Open the app from Shopify Admin");
+    if (!shop) {
+      alert("Open this app from Shopify Admin.");
       return;
     }
-
-    window.location.href = `/auth?shop=${shopParam}`;
+    window.location.href = `/auth?shop=${shop}`;
   };
 
-  /* ---------- LANDING ---------- */
+  // ---------------- LANDING ----------------
   if (page === "landing") {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ textAlign: "center" }}>
-          <h1>RushFee</h1>
-          <p>Turn urgency into revenue</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
+        <h1 className="text-4xl font-bold mb-4">RushFee</h1>
+        <p className="text-gray-600 mb-8 text-center max-w-md">
+          Turn urgency into revenue with priority processing.
+        </p>
 
-          <button onClick={startInstall}>Get Started</button>
-          <br /><br />
-          <button onClick={startInstall}>Start for Free</button>
+        <div className="flex gap-4">
+          <button
+            onClick={startInstall}
+            className="bg-black text-white px-6 py-3 rounded-xl"
+          >
+            Get Started Now
+          </button>
+
+          <button
+            onClick={startInstall}
+            className="border px-6 py-3 rounded-xl"
+          >
+            Start for Free
+          </button>
         </div>
       </div>
     );
   }
 
-  /* ---------- CONFIG ---------- */
+  // ---------------- CONFIG ----------------
   if (page === "config") {
     return (
-      <div style={{ padding: 40 }}>
-        <h2>Config Page</h2>
-        <p>Shop: {shop}</p>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <h2 className="text-2xl font-bold mb-2">Setup</h2>
+        <p className="mb-6 text-gray-600">Store: {shop}</p>
 
-        <button onClick={() => setPage("dashboard")}>
-          Continue to Dashboard
-        </button>
+        <div className="bg-white p-6 rounded-xl shadow">
+          <p className="mb-4">Configuration step.</p>
+          <button
+            onClick={() => setPage("dashboard")}
+            className="bg-black text-white px-4 py-2 rounded-lg"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     );
   }
 
-  /* ---------- DASHBOARD ---------- */
+  // ---------------- DASHBOARD ----------------
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Dashboard</h2>
-      <p>Shop: {shop}</p>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h2 className="text-2xl font-bold mb-2">Dashboard</h2>
+      <p className="text-gray-600 mb-6">Store: {shop}</p>
+
+      <div className="bg-white p-6 rounded-xl shadow">
+        <p>Connected. Real data next.</p>
+      </div>
     </div>
   );
-}            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Simple, Transparent <span className="text-white">Pricing</span>
-            </h2>
-            <p className="text-gray-400 mb-16">
-              No monthly fees. We only make money when you do.
-            </p>
-
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/20 to-pink-500/20 blur-3xl rounded-3xl -z-10"></div>
-
-              <div className="glass-card rounded-3xl p-8 md:p-12 border border-white/10 max-w-lg mx-auto relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-btn-gradient"></div>
-
-                <div className="mb-8">
-                  <span className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider">
-                    Pay As You Go
-                  </span>
-                </div>
-
-                <div className="flex items-end justify-center gap-2 mb-6">
-                  <span className="text-6xl font-bold text-white">$0.20</span>
-                  <span className="text-gray-400 text-xl mb-2">
-                    / priority order
-                  </span>
-                </div>
-
-                <p className="text-gray-400 mb-8 max-w-xs mx-auto">
-                  Flat fee per priority order generated. No hidden costs or
-                  monthly subscriptions.
-                </p>
-
-                <div className="space-y-4 text-left max-w-xs mx-auto mb-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">
-                      <FaCheck />
-                    </div>
-                    <span className="text-gray-300">Unlimited Revenue</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xs">
-                      <FaCheck />
+}                      <FaCheck />
                     </div>
                     <span className="text-gray-300">Instant Setup</span>
                   </div>
