@@ -6,9 +6,7 @@ export default function App() {
   const [page, setPage] = useState<Page>("landing");
   const [shop, setShop] = useState<string | null>(null);
 
-  /* -------------------------------------------
-     READ SHOP PARAM FROM URL
-  -------------------------------------------- */
+  // Read ?shop= from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const shopParam = params.get("shop");
@@ -19,207 +17,57 @@ export default function App() {
     }
   }, []);
 
-  /* -------------------------------------------
-     START SHOPIFY INSTALL (BUTTON CLICK)
-  -------------------------------------------- */
+  // Start OAuth
   const startInstall = () => {
     const params = new URLSearchParams(window.location.search);
     const shopParam = params.get("shop");
 
     if (!shopParam) {
-      alert(
-        "Missing shop parameter.\n\nOpen the app from Shopify Admin."
-      );
+      alert("Open the app from Shopify Admin");
       return;
     }
 
     window.location.href = `/auth?shop=${shopParam}`;
   };
 
-  /* -------------------------------------------
-     LANDING PAGE
-  -------------------------------------------- */
+  /* ---------- LANDING ---------- */
   if (page === "landing") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
-        <h1 className="text-4xl font-bold mb-4">RushFee</h1>
-        <p className="text-gray-600 mb-8 text-center max-w-md">
-          Turn urgency into revenue by charging customers for priority
-          processing.
-        </p>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <h1>RushFee</h1>
+          <p>Turn urgency into revenue</p>
 
-        <div className="flex gap-4">
-          <button
-            onClick={startInstall}
-            className="rounded-xl bg-black px-6 py-3 text-white font-semibold hover:opacity-90"
-          >
-            Get Started Now
-          </button>
-
-          <button
-            onClick={startInstall}
-            className="rounded-xl border px-6 py-3 font-semibold hover:bg-gray-50"
-          >
-            Start for Free
-          </button>
+          <button onClick={startInstall}>Get Started</button>
+          <br /><br />
+          <button onClick={startInstall}>Start for Free</button>
         </div>
       </div>
     );
   }
 
-  /* -------------------------------------------
-     CONFIG PAGE
-  -------------------------------------------- */
+  /* ---------- CONFIG ---------- */
   if (page === "config") {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <header className="mb-6">
-          <h2 className="text-2xl font-bold">RushFee Setup</h2>
-          <p className="text-sm text-gray-600">
-            Store: <strong>{shop}</strong>
-          </p>
-        </header>
+      <div style={{ padding: 40 }}>
+        <h2>Config Page</h2>
+        <p>Shop: {shop}</p>
 
-        <div className="bg-white rounded-xl p-6 shadow">
-          <p className="mb-4">
-            Configuration page (real data comes next).
-          </p>
-
-          <button
-            onClick={() => setPage("dashboard")}
-            className="rounded-lg bg-black px-5 py-2 text-white"
-          >
-            Save & Continue
-          </button>
-        </div>
+        <button onClick={() => setPage("dashboard")}>
+          Continue to Dashboard
+        </button>
       </div>
     );
   }
 
-  /* -------------------------------------------
-     DASHBOARD
-  -------------------------------------------- */
+  /* ---------- DASHBOARD ---------- */
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <header className="mb-6">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
-        <p className="text-sm text-gray-600">
-          Store: <strong>{shop}</strong>
-        </p>
-      </header>
-
-      <div className="bg-white rounded-xl p-6 shadow">
-        <p>Dashboard connected. No mock data anymore.</p>
-      </div>
+    <div style={{ padding: 40 }}>
+      <h2>Dashboard</h2>
+      <p>Shop: {shop}</p>
     </div>
   );
-}                      </div>
-                      <div className="h-3 w-12 bg-gray-700 rounded"></div>
-                    </div>
-
-                    {/* The RushFee Widget */}
-                    <div className="bg-gradient-to-r from-cyan-900/20 to-pink-900/20 border border-pink-500/30 p-4 rounded-xl mt-6 animate-pulse">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-1">
-                          <input type="checkbox" checked readOnly className="w-5 h-5 rounded border-gray-600 text-pink-500 focus:ring-pink-500 bg-gray-800" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-white text-sm">
-                              Priority Processing
-                            </h4>
-                            <span className="bg-pink-500 text-[10px] font-bold px-1.5 py-0.5 rounded text-white">
-                              HOT
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Skip the line! Your order will be packed and shipped
-                            first.
-                          </p>
-                        </div>
-                        <div className="text-white font-bold text-sm ml-auto">
-                          +$4.99
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-4 border-t border-white/10 mt-4">
-                      <span className="text-gray-400">Total</span>
-                      <span className="text-xl font-bold text-white">
-                        $54.98
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Text Content */}
-              <div className="order-1 md:order-2">
-                <h2 className="text-3xl md:text-5xl font-bold mb-6">
-                  Boost AOV <br />
-                  <span className="text-gray-500">Effortlessly</span>
-                </h2>
-                <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                  Stop leaving money on the table. RushFee adds a simple,
-                  high-converting upsell to your cart or checkout page.
-                  Customers love the option to skip the queue, and you love the
-                  extra revenue.
-                </p>
-                <ul className="space-y-4">
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs">
-                      <FaCheck />
-                    </div>
-                    100% Pure Profit Margin
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs">
-                      <FaCheck />
-                    </div>
-                    Fully Customizable Widget
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-300">
-                    <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs">
-                      <FaCheck />
-                    </div>
-                    Works with all Shopify Themes
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. TRUSTED BY MERCHANTS */}
-        <section className="py-12 border-y border-white/5 bg-black/40">
-          <div className="max-w-6xl mx-auto px-4 text-center">
-            <p className="text-sm text-gray-500 uppercase tracking-widest mb-8">
-              Trusted by over 23,000+ merchants
-            </p>
-            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <FaShopify className="text-3xl" /> Shopify
-              </div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <FaAws className="text-3xl" /> Amazon
-              </div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <FaStripe className="text-3xl" /> Stripe
-              </div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <span className="text-3xl">📦</span> DHL
-              </div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <span className="text-3xl">📮</span> FedEx
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. PRICING SECTION */}
-        <section className="py-24 px-4 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+}            <h2 className="text-3xl md:text-5xl font-bold mb-4">
               Simple, Transparent <span className="text-white">Pricing</span>
             </h2>
             <p className="text-gray-400 mb-16">
