@@ -11,20 +11,43 @@ const {
   APP_URL
 } = process.env;
 
-// Home / Landing page
+/**
+ * 1️⃣ Landing page (NO AUTH HERE)
+ * Shopify will open this after install
+ */
 app.get("/", (req, res) => {
-  const shop = req.query.shop;
+  res.send(`
+    <h1>RushFee</h1>
+    <p>Turn urgency into revenue</p>
 
-  // If Shopify opened the app and shop is present, start OAuth
-  if (shop) {
-    return res.redirect(`/auth?shop=${shop}`);
-  }
-
-  // Fallback (direct browser access)
-  res.send("RushFee backend running");
+    <form action="/start" method="GET">
+      <input
+        type="hidden"
+        name="shop"
+        value="${req.query.shop || ""}"
+      />
+      <button type="submit">Start for free</button>
+    </form>
+  `);
 });
 
-// 1️⃣ Start OAuth
+/**
+ * 2️⃣ User clicks "Start for free"
+ * This is where OAuth starts
+ */
+app.get("/start", (req, res) => {
+  const shop = req.query.shop;
+
+  if (!shop) {
+    return res.status(400).send("Missing shop parameter");
+  }
+
+  res.redirect(`/auth?shop=${shop}`);
+});
+
+/**
+ * 3️⃣ Shopify OAuth
+ */
 app.get("/auth", (req, res) => {
   const shop = req.query.shop;
   if (!shop) return res.status(400).send("Missing shop parameter");
@@ -42,7 +65,9 @@ app.get("/auth", (req, res) => {
   res.redirect(installUrl);
 });
 
-// 2️⃣ OAuth callback
+/**
+ * 4️⃣ OAuth callback
+ */
 app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
   if (!shop || !code) return res.status(400).send("Missing parameters");
@@ -65,12 +90,15 @@ app.get("/auth/callback", async (req, res) => {
   console.log("Installed shop:", shop);
   console.log("Access token received");
 
-  // 🔜 Later: save shop + token in Supabase
+  // 🔜 Save shop + token later (Supabase / DB)
 
-  res.redirect("/");
+  res.redirect("/config");
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("RushFee running on port " + PORT);
-});
+/**
+ * 5️⃣ Config page (after auth)
+ */
+app.get("/config", (req, res) => {
+  res.send(`
+    <h1>RushFee Configuration</h1>
+    <p>Set your priority order price here</
