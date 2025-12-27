@@ -7,7 +7,7 @@ import { supabase } from "./supabase.js";
 
 const app = express();
 
-// Fix __dirname for ES modules
+// ES module fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -20,22 +20,17 @@ const {
 
 /* ---------------- FRONTEND ---------------- */
 
-// Serve Vite build
 app.use(express.static(path.join(__dirname, "../dist")));
 
-// Serve frontend (NO LOGIC HERE)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-/* ---------------- SHOPIFY AUTH ---------------- */
+/* ---------------- SHOPIFY OAUTH ---------------- */
 
 app.get("/auth", (req, res) => {
   const { shop } = req.query;
-
-  if (!shop) {
-    return res.status(400).send("Missing shop parameter");
-  }
+  if (!shop) return res.status(400).send("Missing shop parameter");
 
   const state = crypto.randomBytes(16).toString("hex");
   const redirectUri = `${APP_URL}/auth/callback`;
@@ -52,12 +47,9 @@ app.get("/auth", (req, res) => {
 
 app.get("/auth/callback", async (req, res) => {
   const { shop, code } = req.query;
+  if (!shop || !code) return res.status(400).send("Missing params");
 
-  if (!shop || !code) {
-    return res.status(400).send("Missing shop or code");
-  }
-
-  const tokenRes = await fetch(
+  const tokenResponse = await fetch(
     `https://${shop}/admin/oauth/access_token`,
     {
       method: "POST",
@@ -70,26 +62,31 @@ app.get("/auth/callback", async (req, res) => {
     }
   );
 
-  const data = await tokenRes.json();
+  const data = await tokenResponse.json();
 
   if (!data.access_token) {
     console.error(data);
-    return res.status(500).send("OAuth failed");
+    return res.status(500).send("Token exchange failed");
   }
 
-  // Save shop
-  await supabase.from("shops").upsert({
-    shop_domain: shop,
-    access_token: data.access_token
-  });
+  const { error } = await supabase
+    .from("shops")
+    .upsert({
+      shop_domain: shop,
+      access_token: data.access_token
+    });
 
-  console.log("✅ Installed:", shop);
+  if (error) {
+    console.error("Supabase error:", error);
+    return res.status(500).send("DB error");
+  }
 
-  // Go to config page
-  res.redirect(`/config?shop=${shop}`);
+  console.log("✅ Shop saved:", shop);
+
+  res.redirect(`/?shop=${shop}`);
 });
 
-/* ---------------- SPA FALLBACK ---------------- */
+/* ---------------- FALLBACK ---------------- */
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
